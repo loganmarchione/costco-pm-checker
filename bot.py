@@ -4,6 +4,9 @@
 ########################################
 import datetime
 import json
+import time
+import random
+import re
 import requests
 
 ########################################
@@ -26,6 +29,15 @@ def log_message(message: str) -> str:
     """
     current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     print(f"{current_time} - {message}")
+
+
+def generate_random_delay():
+    """
+    generate a random delay between X and X seconds
+    """
+    delay = random.randint(10, 30)
+    log_message(f"STATE: Waiting for {delay} seconds...")
+    time.sleep(delay)
 
 
 def get_page(url: str) -> tuple[int, bytes]:
@@ -87,6 +99,35 @@ def get_item_json(html_content: bytes) -> list:
         exit(1)
 
 
+def ajax_request(itemId: str, productId: str, catalogId: str) -> tuple[int, bytes]:
+    """
+    gets the content of a page using the requests module
+
+    args:
+        url (str): the url to get
+
+    returns:
+        tuple[int, bytes]: a tuple containing the HTTP status code and the content of the web page
+    """
+    headers = {
+        "User-Agent": user_agent,
+    }
+
+    url = f"https://www.costco.com/AjaxGetInventoryDetail?itemId={itemId}&catalogId={catalogId}&productId={productId}&WH=any"
+
+    try:
+        page = requests.get(url, headers=headers)
+        if page.status_code == 200:
+            log_message(f"STATE: HTTP status code is {page.status_code}")
+            return page.status_code, page.content
+        else:
+            log_message(f"ERROR: HTTP status code is {page_status_code} for {url}")
+            exit(1)
+    except requests.RequestException as e:
+        log_message(f"ERROR: Failed to fetch page content for URL '{url}': {e}")
+        exit(1)
+
+
 ########################################
 # script starts here
 ########################################
@@ -95,18 +136,42 @@ try:
     # open the file in read mode
     with open('URLs.txt', 'r') as file:
         for line in file:
-            line = line.strip()
             # check if the line starts with "https://" so that we can ignore other lines with comments
             if line.startswith('https://'):
+                # strip the blank characters at the beginning and end of each line
+                line = line.strip()
+                # to simulate not being a bot, wait a random amount of time
+                generate_random_delay()
+                # get the content of the page
                 page_status_code, page_content = get_page(line)
-                
+                # from here, we need four things to make the API call to https://www.costco.com/AjaxGetInventoryDetail
+                #   itemId
+                #   productId
+                #   catalogId
+                #   WH (warehouse)
+
+                # find the catalogId in a different part of the page
+                page_content_str = page_content.decode('utf-8')
+                pattern = r"wcs\.catalogId\s*=\s*'(\d+)'"
+                match = re.search(pattern, page_content_str)
+                if match:
+                    catalogId = match.group(1)
+                else:
+                    log_message("ERROR: Catalog ID not found...")
+                    exit(1)
+
                 # get the JSON data and parse it
                 json_data = get_item_json(page_content)
                 for item in json_data:
                     partNumber = item.get("partNumber")
                     productName = item.get("productName")
-                    inventory = item.get("inventory")
-                    log_message(f"STATE: Item '{productName}' is {inventory}")
+                    itemId = item.get("catentry")
+                    # the productId appears to always be the ItemId minus one
+                    productId = int(itemId) - 1
+
+                # finally, make the request to check stock
+                ajax_status_code, ajax_content = ajax_request(itemId, productId, catalogId)
+                print(ajax_content)
                 
 
 except FileNotFoundError:
