@@ -12,3 +12,7 @@
     ```
     python3 bot.py
     ```
+
+## Legal
+
+This is a personal project that is not monitized and is not endorsed by Costco. 
