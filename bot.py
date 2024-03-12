@@ -41,8 +41,18 @@ def get_page(url: str) -> tuple[int, bytes]:
     headers = {
         "User-Agent": user_agent,
     }
-    page = requests.get(url, headers=headers)
-    return page.status_code, page.content
+
+    try:
+        page = requests.get(url, headers=headers)
+        if page.status_code == 200:
+            log_message(f"STATE: HTTP status code is {page.status_code}")
+            return page.status_code, page.content
+        else:
+            log_message(f"ERROR: HTTP status code is {page_status_code} for {url}")
+            exit(1)
+    except requests.RequestException as e:
+        log_message(f"ERROR: Failed to fetch page content for URL '{url}': {e}")
+        exit(1)
 
 
 def get_item_json(html_content: bytes) -> list:
@@ -88,18 +98,9 @@ try:
             line = line.strip()
             # check if the line starts with "https://" so that we can ignore other lines with comments
             if line.startswith('https://'):
-                # try to get the page
-                try:
-                    page_status_code, page_content = get_page(line)
-                except requests.RequestException as e:
-                    log_message(f"ERROR: Failed to fetch page content for URL '{line}': {e}")
-                    continue
+                page_status_code, page_content = get_page(line)
                 
-                if page_status_code == 200:
-                    log_message(f"STATE: HTTP status code is {page_status_code}")
-                else:
-                    log_message(f"ERROR: HTTP status code is {page_status_code} for {line}")
-                    exit(1)
+                # get the JSON data and parse it
                 json_data = get_item_json(page_content)
                 for item in json_data:
                     partNumber = item.get("partNumber")
