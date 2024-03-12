@@ -15,4 +15,4 @@
 
 ## Legal
 
-This is a personal project that is not monitized and is not endorsed by Costco. 
+This is a personal project that is not monitized. It is not endorsed by or affiliated with Costco. 
