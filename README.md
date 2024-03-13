@@ -21,4 +21,4 @@
 
 ## Legal
 
-This is a personal project that is not monitized. It is not endorsed by or affiliated with Costco in any way.
+This is a personal project that is not monetized. It is not endorsed by or affiliated with Costco in any way.
