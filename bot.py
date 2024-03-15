@@ -100,15 +100,6 @@ def get_item_json(html_content: bytes) -> list:
 
 
 def ajax_request(itemId: str, productId: str, catalogId: str) -> tuple[int, bytes]:
-    """
-    gets the content of a page using the requests module
-
-    args:
-        url (str): the url to get
-
-    returns:
-        tuple[int, bytes]: a tuple containing the HTTP status code and the content of the web page
-    """
     headers = {
         "User-Agent": user_agent,
     }
