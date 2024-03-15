@@ -1,6 +1,6 @@
 # ⚠️ WARNING ⚠️
 
-This doesn't actually work unless you're logged in. The result of the [Ajax request](https://github.com/loganmarchione/costco-pm-checker/blob/main/bot.py#L172-L174) is always this:
+This doesn't actually work unless you're logged in. The result of the [Ajax request](https://github.com/loganmarchione/costco-pm-checker/blob/main/bot.py#L163-L165) is always this:
 
 ```
 { "errorCode": null, "errorMessage": "2-Day Delivery is currently not available in your area. Please visit your nearest <a href=\"/warehouse-locations\" class=\"body-copy-link\">Costco Warehouse</a> or visit our <a href=\"https://www.costco.com\" class=\"body-copy-link\">Grocery FAQs</a> for more information.", "errorMessageKey": "ERR_ZIP_NOTVALID", "errorMessageParam": null, "correctiveActionMessage": "", "correlationIdentifier": "-106cc8ca:18e3443e920:-1046", "exceptionData": { "Reason": "ZipCode is null or empty" }, "exceptionType": "0", "originatingCommand": "", "systemMessage": "" }
